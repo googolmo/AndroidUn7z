@@ -5,74 +5,122 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import android.content.Context;
-import android.util.Log;
+import android.text.TextUtils;
 
-public class AndUn7z {
+public final class AndUn7z {
     private static final String TAG = "AndUn7z";
 
     /**
-     * Extract from assets
-     * @param context
-     * @param assetPath
-     * @param outPath
-     * @return
-     * @throws Exception
+     * Extract file
+     * @param filePath file path
+     * @param outPath output file path
+     * @return if True is successful
      */
-    public static boolean extractAssets(Context context, String assetPath, String outPath)
-    {
+    public static boolean extract7z(String filePath, String outPath) {
         File outDir = new File(outPath);
-        if(!outDir.exists() || !outDir.isDirectory())
-        {
+        if (!outDir.exists() || !outDir.isDirectory()) {
+            outDir.mkdirs();
+        }
+        return sLibIsUsable && (AndUn7z.un7zip(filePath, outPath) == 0);
+    }
+
+    /**
+     * Extract file from Assets
+     * @param context context
+     * @param assetPath asset file path
+     * @param outPath output file path
+     * @return if True is successful.
+     */
+    public static boolean extractAssets(Context context, String assetPath, String outPath) {
+        File cacheDir = context.getExternalCacheDir();
+        if (cacheDir == null) {
+            cacheDir = context.getCacheDir();
+        }
+        cacheDir = new File(cacheDir, TAG);
+
+        return extractAssets(context, assetPath, outPath, cacheDir.getAbsolutePath());
+    }
+
+    /**
+     * Extract file from assets
+     *
+     * @param context context
+     * @param assetPath asset file path
+     * @param outPath output file path
+     * @param cachePath cache dir path
+     * @return if True is successful
+     */
+    public static boolean extractAssets(Context context, String assetPath, String outPath, String cachePath) {
+        if (context == null) {
+            throw new IllegalArgumentException("context can not be null!");
+        }
+        if (TextUtils.isEmpty(assetPath) || TextUtils.isEmpty(outPath) || TextUtils.isEmpty(cachePath)) {
+            throw new IllegalArgumentException("Arguments can not be null!");
+        }
+        File outDir = new File(outPath);
+        if (!outDir.exists() || !outDir.isDirectory()) {
             outDir.mkdirs();
         }
 
-        String tempPath = outPath + File.separator + assetPath + ".temp";
+        File tempFile = new File(cachePath, assetPath + ".tmp");
         try {
-            copyFromAssets(context, assetPath, tempPath);
+            copyFromAssets(context, assetPath, tempFile.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        if (libIsUsable) {
-            boolean ret = (AndUn7z.un7zip(tempPath, outPath) == 0);
-            new File(tempPath).delete();
+        if (sLibIsUsable) {
+            boolean ret = (AndUn7z.un7zip(tempFile.getAbsolutePath(), outPath) == 0);
+            tempFile.delete();
             return ret;
         } else {
             return false;
         }
     }
 
-    /**
-     * Copy asset to temp
-     * @param context
-     * @param assetPath
-     * @param tempPath
-     * @throws Exception
-     */
-    private static void copyFromAssets(Context context, String assetPath, String tempPath)
-            throws Exception
-    {
-        InputStream inputStream = context.getAssets().open(assetPath);
-        FileOutputStream fileOutputStream = new FileOutputStream(tempPath);
-        int length = -1;
-        byte[] buffer = new byte[0x1400];
-        while ((length = inputStream.read(buffer)) != -1) {
-            fileOutputStream.write(buffer, 0, length);
+    private static void copyFromAssets(Context context, String assetPath, String tempPath) {
+        InputStream inputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            inputStream = context.getAssets().open(assetPath);
+            fileOutputStream = new FileOutputStream(tempPath);
+            int length;
+            byte[] buffer = new byte[0x1400];
+            while ((length = inputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, length);
+            }
+            fileOutputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        fileOutputStream.flush();
-        fileOutputStream.close();
-        inputStream.close();
+
     }
 
     //JNI interface
     private static native int un7zip(String filePath, String outPath);
 
-    private static boolean libIsUsable = true;
+    private static boolean sLibIsUsable = true;
+
     static {
         try {
             System.loadLibrary("un7z");
         } catch (UnsatisfiedLinkError error) {
-            libIsUsable = false;
+            sLibIsUsable = false;
         }
     }
 }
