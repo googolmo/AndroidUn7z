@@ -18,8 +18,9 @@ public final class AndUn7z {
      */
     public static boolean extract7z(String filePath, String outPath) {
         File outDir = new File(outPath);
-        if (!outDir.exists() || !outDir.isDirectory()) {
-            outDir.mkdirs();
+        File parent = outDir.getParentFile();
+        if (!parent.exists() || !parent.isDirectory()) {
+            parent.mkdirs();
         }
         return sLibIsUsable && (AndUn7z.un7zip(filePath, outPath) == 0);
     }
@@ -37,6 +38,9 @@ public final class AndUn7z {
             cacheDir = context.getCacheDir();
         }
         cacheDir = new File(cacheDir, TAG);
+//        if (!cacheDir.exists() || !cacheDir.isDirectory()) {
+//            cacheDir.mkdirs();
+//        }
 
         return extractAssets(context, assetPath, outPath, cacheDir.getAbsolutePath());
     }
@@ -63,6 +67,10 @@ public final class AndUn7z {
         }
 
         File tempFile = new File(cachePath, assetPath + ".tmp");
+        File parentFile = tempFile.getParentFile();
+        if (!parentFile.exists() && !parentFile.isDirectory()) {
+            parentFile.mkdirs();
+        }
         try {
             copyFromAssets(context, assetPath, tempFile.getAbsolutePath());
         } catch (Exception e) {
