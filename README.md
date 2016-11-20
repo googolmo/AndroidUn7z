@@ -15,6 +15,6 @@ start to run,this library is to do the work.<br>
 ###2.Usage
 
 ```groovy
-compile 'im.amomo.andun7z:library:1.0.3'
+compile 'im.amomo.andun7z:library:1.1.0'
 ```
 

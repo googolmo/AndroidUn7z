@@ -5,10 +5,17 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 
 public final class AndUn7z {
     private static final String TAG = "AndUn7z";
+
+    private static boolean sLibIsUsable = true;
 
     /**
      * Extract file
@@ -16,13 +23,27 @@ public final class AndUn7z {
      * @param outPath output file path
      * @return if True is successful
      */
-    public static boolean extract7z(String filePath, String outPath) {
-        File outDir = new File(outPath);
+    @WorkerThread
+    public static boolean extract7z(@NonNull String filePath, @Nullable String outPath) {
+        if (!sLibIsUsable) {
+            return false;
+        }
+        if (TextUtils.isEmpty(filePath)) {
+            throw new IllegalArgumentException("FilePath can NOT be null");
+        }
+        File outDir;
+        if (TextUtils.isEmpty(outPath)) {
+            outDir = new File(filePath).getParentFile();
+        } else {
+            outDir = new File(outPath);
+        }
         File parent = outDir.getParentFile();
         if (!parent.exists() || !parent.isDirectory()) {
-            parent.mkdirs();
+            if (parent.mkdirs()) {
+                return AndUn7z.un7zip(filePath, outPath) == 0;
+            }
         }
-        return sLibIsUsable && (AndUn7z.un7zip(filePath, outPath) == 0);
+        return false;
     }
 
     /**
@@ -121,8 +142,6 @@ public final class AndUn7z {
 
     //JNI interface
     private static native int un7zip(String filePath, String outPath);
-
-    private static boolean sLibIsUsable = true;
 
     static {
         try {
