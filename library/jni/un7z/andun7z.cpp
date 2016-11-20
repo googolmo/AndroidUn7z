@@ -1,13 +1,13 @@
 #include <jni.h>
 #include <android/log.h>
 
-#include "src/Types.h"
+#include "src/7zTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define LOG_TAG "jniLog"
+#define LOG_TAG "un7z"
 #undef LOG
 
 #ifdef DEBUG
@@ -36,14 +36,14 @@ int extract7z(const char* srcFile, const char* dstPath);
 JNIEXPORT jint JNICALL Java_com_hu_andun7z_AndUn7z_un7zip
 (JNIEnv *env, jclass thiz, jstring filePath, jstring outPath)
 {
-	const char* cfilePath = (const char*)env->GetStringUTFChars(filePath, NULL);
-	const char* coutPath = (const char*)env->GetStringUTFChars(outPath, NULL);
-	LOGD("start extract filePath[%s], outPath[%s]", cfilePath, coutPath);
-	jint ret = extract7z(cfilePath, coutPath);
-	LOGD("end extract");
-	env->ReleaseStringUTFChars(filePath, cfilePath);
-	env->ReleaseStringUTFChars(outPath, coutPath);
-	return ret;
+    const char* cFilePath = (const char*)env->GetStringUTFChars(filePath, NULL);
+    const char* cOutPath = (const char*)env->GetStringUTFChars(outPath, NULL);
+    LOGD("start extract filePath[%s], outPath[%s]", cFilePath, cOutPath);
+    jint ret = extract7z(cFilePath, cOutPath);
+    LOGD("end extract");
+    env->ReleaseStringUTFChars(filePath, cFilePath);
+    env->ReleaseStringUTFChars(outPath, cOutPath);
+    return ret;
 }
 
 #ifdef __cplusplus
