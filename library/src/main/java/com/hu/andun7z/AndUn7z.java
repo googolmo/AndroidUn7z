@@ -37,13 +37,11 @@ public final class AndUn7z {
         } else {
             outDir = new File(outPath);
         }
-        File parent = outDir.getParentFile();
+        File parent = outDir;
         if (!parent.exists() || !parent.isDirectory()) {
-            if (parent.mkdirs()) {
-                return AndUn7z.un7zip(filePath, outPath) == 0;
-            }
+            parent.mkdirs();
         }
-        return false;
+        return AndUn7z.un7zip(filePath, outPath) == 0;
     }
 
     /**
