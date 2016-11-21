@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,8 +28,8 @@ public class AndUn7zTest {
     public void extractAssets() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
         File cache = new File(context.getExternalCacheDir(), "test");
-        boolean value = AndUn7z.extractAssets(context, "test.7z", cache.getAbsolutePath());
-        assertEquals(value, true);
+        int value = AndUn7z.extractAssets(context, "test.7z", cache.getAbsolutePath());
+        assertEquals(value, 0);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "temp.webp");
     }
@@ -45,8 +46,8 @@ public class AndUn7zTest {
         File cache = new File(context.getExternalCacheDir(), "un7z2");
         cache.mkdirs();
 
-        boolean result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
-        assertEquals(result, true);
+        int result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
+        assertEquals(result, 0);
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "temp.webp");
@@ -65,8 +66,8 @@ public class AndUn7zTest {
         File cache = new File(context.getExternalCacheDir(), "un7z3");
         cache.mkdirs();
 
-        boolean result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
-        assertEquals(result, true);
+        int result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
+        assertEquals(result, 0);
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "main_en");

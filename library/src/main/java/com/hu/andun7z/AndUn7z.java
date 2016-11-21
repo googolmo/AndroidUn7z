@@ -17,6 +17,9 @@ public final class AndUn7z {
 
     private static boolean sLibIsUsable = true;
 
+    public static final int ERROR_LIBS_UNLOAD = -1;
+    public static final int OK = 0;
+
     /**
      * Extract file
      * @param filePath file path
@@ -24,9 +27,9 @@ public final class AndUn7z {
      * @return if True is successful
      */
     @WorkerThread
-    public static boolean extract7z(@NonNull String filePath, @Nullable String outPath) {
+    public static int extract7z(@NonNull String filePath, @Nullable String outPath) {
         if (!sLibIsUsable) {
-            return false;
+            return ERROR_LIBS_UNLOAD;
         }
         if (TextUtils.isEmpty(filePath)) {
             throw new IllegalArgumentException("FilePath can NOT be null");
@@ -37,11 +40,10 @@ public final class AndUn7z {
         } else {
             outDir = new File(outPath);
         }
-        File parent = outDir;
-        if (!parent.exists() || !parent.isDirectory()) {
-            parent.mkdirs();
+        if (!outDir.exists() || !outDir.isDirectory()) {
+            outDir.mkdirs();
         }
-        return AndUn7z.un7zip(filePath, outPath) == 0;
+        return AndUn7z.un7zip(filePath, outDir.getAbsolutePath());
     }
 
     /**
@@ -51,7 +53,7 @@ public final class AndUn7z {
      * @param outPath output file path
      * @return if True is successful.
      */
-    public static boolean extractAssets(Context context, String assetPath, String outPath) {
+    public static int extractAssets(Context context, String assetPath, String outPath) {
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
@@ -73,7 +75,7 @@ public final class AndUn7z {
      * @param cachePath cache dir path
      * @return if True is successful
      */
-    public static boolean extractAssets(Context context, String assetPath, String outPath, String cachePath) {
+    public static int extractAssets(Context context, String assetPath, String outPath, String cachePath) {
         if (context == null) {
             throw new IllegalArgumentException("context can not be null!");
         }
@@ -94,14 +96,14 @@ public final class AndUn7z {
             copyFromAssets(context, assetPath, tempFile.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return 101;
         }
         if (sLibIsUsable) {
-            boolean ret = (AndUn7z.un7zip(tempFile.getAbsolutePath(), outPath) == 0);
+            int ret = AndUn7z.un7zip(tempFile.getAbsolutePath(), outPath);
             tempFile.delete();
             return ret;
         } else {
-            return false;
+            return ERROR_LIBS_UNLOAD;
         }
     }
 

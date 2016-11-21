@@ -326,7 +326,7 @@ int MY_CDECL extract7z(const char* inFile, const char* outPath)
   if (InFile_Open(&archiveStream.file, inFile))
   {
     PrintError("can not open input file");
-    return 1;
+    return SZ_ERROR_OPEN_FAILED;
   }
 
   FileInStream_CreateVTable(&archiveStream);
@@ -444,10 +444,7 @@ int MY_CDECL extract7z(const char* inFile, const char* outPath)
   if (res == SZ_OK)
   {
     LOGD("Everything is Ok");
-    return 0;
-  }
-
-  if (res == SZ_ERROR_UNSUPPORTED)
+  } else if (res == SZ_ERROR_UNSUPPORTED)
     PrintError("decoder doesn't support this archive");
   else if (res == SZ_ERROR_MEM)
     PrintError("can not allocate memory");
@@ -456,5 +453,5 @@ int MY_CDECL extract7z(const char* inFile, const char* outPath)
   else
     LOGE("\nERROR #%d\n", res);
 
-  return 1;
+  return res;
 }
