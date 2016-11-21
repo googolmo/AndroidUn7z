@@ -39,6 +39,7 @@ EXTERN_C_BEGIN
 
 #define SZ_ERROR_ARCHIVE 16
 #define SZ_ERROR_NO_ARCHIVE 17
+#define SZ_ERROR_OPEN_FAILED 100
 
 typedef int SRes;
 
