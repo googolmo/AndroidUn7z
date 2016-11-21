@@ -33,18 +33,43 @@ public class AndUn7zTest {
         assertEquals(cache.list()[0], "temp.webp");
     }
 
+    @Test
     public void extract7z() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
         File input = new File(context.getExternalCacheDir(), "test1");
+        input.mkdirs();
         copyAssets(context, "test.7z", input.getAbsolutePath());
         input = new File(input, "test.7z");
         assertEquals(input.exists(), true);
 
-        boolean result = AndUn7z.extract7z(input.getAbsolutePath(), input.getParent());
+        File cache = new File(context.getExternalCacheDir(), "un7z2");
+        cache.mkdirs();
+
+        boolean result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
         assertEquals(result, true);
-        assertEquals(input.getParentFile().exists(), true);
-        assertEquals(input.getParentFile().list().length, 1);
-        assertEquals(input.getParentFile().list()[0], "temp.webp");
+        assertEquals(cache.exists(), true);
+        assertEquals(cache.list().length, 1);
+        assertEquals(cache.list()[0], "temp.webp");
+    }
+
+    @Test
+    public void extract7zBig() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+        File input = new File(context.getExternalCacheDir(), "test1");
+        input.mkdirs();
+        assertEquals(input.exists(), true);
+        copyAssets(context, "test2.7z", input.getAbsolutePath());
+        input = new File(input, "test2.7z");
+        assertEquals(input.exists(), true);
+
+        File cache = new File(context.getExternalCacheDir(), "un7z3");
+        cache.mkdirs();
+
+        boolean result = AndUn7z.extract7z(input.getAbsolutePath(), cache.getAbsolutePath());
+        assertEquals(result, true);
+        assertEquals(cache.exists(), true);
+        assertEquals(cache.list().length, 1);
+        assertEquals(cache.list()[0], "main_en");
     }
 
     private static void copyAssets(Context context, String file, String path) {
