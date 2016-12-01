@@ -30,3 +30,5 @@ proguard/
 build/
 *.iml
 .DS_Store
+
+.externalNativeBuild/
