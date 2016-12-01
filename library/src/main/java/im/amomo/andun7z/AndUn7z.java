@@ -26,7 +26,7 @@ public final class AndUn7z {
      * Extract file
      * @param filePath file path
      * @param outPath output file path
-     * @return if True is successful
+     * @return if 0 is successful, -1 is library can't be loaded
      */
     @WorkerThread
     public static int extract7z(@NonNull String filePath, @Nullable String outPath) {
@@ -48,12 +48,22 @@ public final class AndUn7z {
         return un7zip(filePath, outDir.getAbsolutePath());
     }
 
+    /**
+     * Extract 7zip file from Assets to Destination Folder
+     * @param manager AssetManager;
+     * @param filePath file path like 'test.z7'
+     * @param outPath destination folder path
+     * @return if 0 is successful, -1 is library can't be loaded
+     */
     public static int extract7z(@NonNull AssetManager manager, @NonNull String filePath, @NonNull String outPath) {
         if (!sLibIsUsable) {
             return ERROR_LIBS_UNLOAD;
         }
         if (TextUtils.isEmpty(filePath)) {
             throw new IllegalArgumentException("FilePath can NOT be null");
+        }
+        if (manager == null) {
+            throw new IllegalArgumentException("AssetManager can NOT be null");
         }
         File outDir;
         if (TextUtils.isEmpty(outPath)) {
