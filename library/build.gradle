@@ -14,6 +14,17 @@ android {
         versionCode Integer.parseInt(project.VERSION_CODE)
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'mips', 'mips64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                //arguments '-DANDROID_PLATFORM=android-23'
+                cppFlags '-frtti -fexceptions'
+            }
+        }
     }
 
     lintOptions {
@@ -21,7 +32,13 @@ android {
         disable 'InvalidPackage'
     }
 
-    resourcePrefix 'Un7z'
+    resourcePrefix 'un7z'
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
 }
 
 dependencies {
