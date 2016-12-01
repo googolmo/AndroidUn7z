@@ -25,16 +25,6 @@ import static org.junit.Assert.assertEquals;
 public class AndUn7zTest {
 
     @Test
-    public void extractAssets() throws Exception {
-        Context context = InstrumentationRegistry.getTargetContext();
-        File cache = new File(context.getExternalCacheDir(), "test");
-        int value = AndUn7z.extractAssets(context, "test.7z", cache.getAbsolutePath());
-        assertEquals(value, 0);
-        assertEquals(cache.list().length, 1);
-        assertEquals(cache.list()[0], "temp.webp");
-    }
-
-    @Test
     public void extract7z() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
         File input = new File(context.getExternalCacheDir(), "test1");

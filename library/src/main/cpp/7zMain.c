@@ -26,8 +26,6 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 #define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,LOG_TAG,__VA_ARGS__)
 
-#define PATH_MAX 2048
-
 static ISzAlloc g_Alloc = { SzAlloc, SzFree };
 
 static int Buf_EnsureSize(CBuf *dest, size_t size)
@@ -189,34 +187,6 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const char* root, const UInt16 *name)
   return res;
 }
 
-static SRes PrintString(const UInt16 *s)
-{
-  CBuf buf;
-  SRes res;
-  Buf_Init(&buf);
-  res = Utf16_To_Char(&buf, s);
-  if (res == SZ_OK)
-    fputs((const char *)buf.data, stdout);
-  Buf_Free(&buf, &g_Alloc);
-  return res;
-}
-
-static void UInt64ToStr(UInt64 value, char *s)
-{
-  char temp[32];
-  int pos = 0;
-  do
-  {
-    temp[pos++] = (char)('0' + (unsigned)(value % 10));
-    value /= 10;
-  }
-  while (value != 0);
-  do
-    *s++ = temp[--pos];
-  while (pos);
-  *s = '\0';
-}
-
 static char *UIntToStr(char *s, unsigned value, int numDigits)
 {
   char temp[16];
@@ -293,9 +263,7 @@ static void GetAttribString(UInt32 wa, Bool isDir, char *s)
 
 // #define NUM_PARENTS_MAX 128
 
-int MY_CDECL extractAssets(const AAsset* asset, const char* outPath)
-{
-  CFileInStream archiveStream;
+int MY_CDECL extract(CFileInStream archiveStream, const char* outPath) {
   CLookToRead lookStream;
   CSzArEx db;
   SRes res;
@@ -312,9 +280,6 @@ int MY_CDECL extractAssets(const AAsset* asset, const char* outPath)
   allocTempImp.Alloc = SzAllocTemp;
   allocTempImp.Free = SzFreeTemp;
 
-  archiveStream.file.asset = asset;
-
-  AssetInStream_CreateVTable(&archiveStream);
   LookToRead_CreateVTable(&lookStream, False);
 
   lookStream.realStream = &archiveStream.s;
@@ -418,26 +383,25 @@ int MY_CDECL extractAssets(const AAsset* asset, const char* outPath)
   }
 
   return res;
+
+}
+
+int MY_CDECL extractAssets(AAsset* asset, const char* outPath)
+{
+  CFileInStream archiveStream;
+
+
+  archiveStream.file.asset = asset;
+
+  AssetInStream_CreateVTable(&archiveStream);
+  int ret = extract(archiveStream, outPath);
+  AAsset_close(asset);
+  return ret;
 }
 
 int MY_CDECL extract7z(const char* inFile, const char* outPath)
 {
   CFileInStream archiveStream;
-  CLookToRead lookStream;
-  CSzArEx db;
-  SRes res;
-  ISzAlloc allocImp;
-  ISzAlloc allocTempImp;
-  UInt16 *temp = NULL;
-  size_t tempSize = 0;
-
-  LOGD("7z ANSI-C Decoder " MY_VERSION_COPYRIGHT_DATE);
-
-  allocImp.Alloc = SzAlloc;
-  allocImp.Free = SzFree;
-
-  allocTempImp.Alloc = SzAllocTemp;
-  allocTempImp.Free = SzFreeTemp;
 
   if (InFile_Open(&archiveStream.file, inFile))
   {
@@ -446,122 +410,10 @@ int MY_CDECL extract7z(const char* inFile, const char* outPath)
   }
 
   FileInStream_CreateVTable(&archiveStream);
-  LookToRead_CreateVTable(&lookStream, False);
 
-  lookStream.realStream = &archiveStream.s;
-  LookToRead_Init(&lookStream);
-
-  CrcGenerateTable();
-
-  SzArEx_Init(&db);
-
-  res = SzArEx_Open(&db, &lookStream.s, &allocImp, &allocTempImp);
-
-  if (res == SZ_OK)
-  {
-    UInt32 i;
-    /*
-    if you need cache, use these 3 variables.
-    if you use external function, you can make these variable as static.
-    */
-    UInt32 blockIndex = 0xFFFFFFFF; /* it can have any value before first call (if outBuffer = 0) */
-    Byte *outBuffer = 0; /* it must be 0 before first call for each new archive. */
-    size_t outBufferSize = 0;  /* it can have any value before first call (if outBuffer = 0) */
-
-    for (i = 0; i < db.NumFiles; i++)
-    {
-      size_t offset = 0;
-      size_t outSizeProcessed = 0;
-      // const CSzFileItem *f = db.Files + i;
-      size_t len;
-      unsigned isDir = SzArEx_IsDir(&db, i);
-
-      len = SzArEx_GetFileNameUtf16(&db, i, NULL);
-      // len = SzArEx_GetFullNameLen(&db, i);
-
-      if (len > tempSize)
-      {
-        SzFree(NULL, temp);
-        tempSize = len;
-        temp = (UInt16 *)SzAlloc(NULL, tempSize * sizeof(temp[0]));
-        if (!temp)
-        {
-          res = SZ_ERROR_MEM;
-          break;
-        }
-      }
-
-      SzArEx_GetFileNameUtf16(&db, i, temp);
-      if (isDir) {
-        printf("/");
-      } else {
-        res = SzArEx_Extract(&db, &lookStream.s, i,
-              &blockIndex, &outBuffer, &outBufferSize,
-              &offset, &outSizeProcessed,
-              &allocImp, &allocTempImp);
-        if (res != SZ_OK)
-          break;
-      }
-
-      CSzFile outFile;
-      size_t processedSize;
-      size_t j;
-      UInt16 *name = temp;
-      const UInt16 *destPath = (const UInt16 *)name;
-
-      for (j = 0; name[j] != 0; j++) {
-        if (name[j] == '/')
-        {
-          name[j] = 0;
-          MyCreateDir(outPath, name);
-          name[j] = CHAR_PATH_SEPARATOR;
-        }
-      }
-
-      if (isDir) {
-        MyCreateDir(outPath, destPath);
-        continue;
-      } else if (OutFile_OpenUtf16(&outFile, outPath, destPath)) {
-        PrintError("can not open output file");
-        res = SZ_ERROR_FAIL;
-        break;
-      }
-
-      processedSize = outSizeProcessed;
-
-      if (File_Write(&outFile, outBuffer + offset, &processedSize) != 0 || processedSize != outSizeProcessed)
-      {
-        PrintError("can not write output file");
-        res = SZ_ERROR_FAIL;
-        break;
-      }
-
-      if (File_Close(&outFile))
-      {
-        PrintError("can not close output file");
-        res = SZ_ERROR_FAIL;
-        break;
-      }
-    }
-    IAlloc_Free(&allocImp, outBuffer);
-  }
-
-  SzArEx_Free(&db, &allocImp);
-  SzFree(NULL, temp);
+  int ret = extract(archiveStream, outPath);
 
   File_Close(&archiveStream.file);
+  return ret;
 
-  if (res == SZ_OK)
-  {
-    LOGD("Everything is Ok");
-  } else if (res == SZ_ERROR_UNSUPPORTED)
-    PrintError("decoder doesn't support this archive");
-  else if (res == SZ_ERROR_MEM)
-    PrintError("can not allocate memory");
-  else if (res == SZ_ERROR_CRC)
-    PrintError("CRC error");
-  else
-    LOGE("\nERROR #%d\n", res);
-
-  return res;
 }
