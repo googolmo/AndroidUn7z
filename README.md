@@ -1,4 +1,4 @@
-AndroidUn7zip
+AndroidUn7z
 ==================
 
 * A simple android ndk library used to simply extract lzma 7z files.<br>
@@ -15,6 +15,19 @@ start to run,this library is to do the work.<br>
 ###2.Usage
 
 ```groovy
-compile 'im.amomo.andun7z:library:1.1.2'
+compile 'im.amomo.andun7z:library:1.2.0'
 ```
+
+```java
+import im.amomo.andun7z.AndUn7z;
+
+public void extract7zip() {
+    AndUn7z.extract7z("a.zip", destinationPath);
+    AndUn7z.extract7z(context.getAsset(), "test.7z", destinationPath);
+}
+```
+
+###3.Notice
+
+Please make sure that your application has permission to write data to external storage
 
