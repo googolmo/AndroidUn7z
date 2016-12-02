@@ -1,0 +1,22 @@
+dependencies:
+    pre:
+        - echo y | android update sdk --no-ui --all --filter "tools, platform-tools"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-25"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;25.0.1"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "cmake;3.6.3155560"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "lldb;2.2"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "ndk-bundle"
+test:
+    pre:
+        - emulator -avd circleci-android22 -no-audio -no-window:
+            background: true
+            parallel: true
+        - circle-android wait-for-boot
+        - adb shell input keyevent 82 &
+    override:
+        - ./gradlew lint library:connectAndroidTest
+    post:
+        - mkdir -p $CIRCLE_TEST_REPORTS/test/
+        - find . -type f -regex ".*/build/outputs/androidTest-results/connected/*.xml" -exec cp {} $CIRCLE_TEST_REPORTS/test/ \;
+        - cp -r library/build/outputs $CIRCLE_ARTIFACTS
+

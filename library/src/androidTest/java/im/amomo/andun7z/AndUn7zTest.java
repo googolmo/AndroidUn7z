@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,7 +32,6 @@ public class AndUn7zTest {
         assertEquals(value, 0);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "temp.webp");
-        deleteDir(cache);
     }
 
     @Test
@@ -53,7 +51,6 @@ public class AndUn7zTest {
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "temp.webp");
-        deleteDir(cache);
     }
 
     @Test
@@ -74,7 +71,6 @@ public class AndUn7zTest {
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "main_en");
-        deleteDir(cache);
     }
 
     @Test
@@ -88,7 +84,6 @@ public class AndUn7zTest {
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "temp.webp");
-        deleteDir(cache);
     }
 
     @Test
@@ -99,7 +94,6 @@ public class AndUn7zTest {
 
         int result = AndUn7z.extract7z(context.getAssets(), "test10.7z", cache.getAbsolutePath());
         assertEquals(result, 100);
-        deleteDir(cache);
     }
 
     @Test
@@ -113,7 +107,6 @@ public class AndUn7zTest {
         assertEquals(cache.exists(), true);
         assertEquals(cache.list().length, 1);
         assertEquals(cache.list()[0], "main_en");
-        deleteDir(cache);
     }
 
 
@@ -162,6 +155,9 @@ public class AndUn7zTest {
     }
 
     private static void deleteDir(File file) {
+        if (file == null) {
+            return;
+        }
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             for (File f : files) {

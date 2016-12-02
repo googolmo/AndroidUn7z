@@ -22,7 +22,8 @@ android {
         externalNativeBuild {
             cmake {
                 //arguments '-DANDROID_PLATFORM=android-23'
-                cppFlags '-frtti -fexceptions'
+                arguments "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang"
+                cppFlags '-frtti -fexceptions -std=c++11'
             }
         }
     }
