@@ -1,6 +1,9 @@
 AndroidUn7z
 ==================
 
+[![Build Status](https://travis-ci.org/googolmo/AndroidUn7z.svg?branch=master)](https://travis-ci.org/googolmo/AndroidUn7z)
+[![CircleCI](https://circleci.com/gh/googolmo/AndroidUn7z/tree/master.svg?style=svg)](https://circleci.com/gh/googolmo/AndroidUn7z/tree/master)
+
 * A simple android ndk library used to simply extract lzma 7z files.<br>
 
 * Some times we need to compress some resources in our applications,in some cases,LZMA 
