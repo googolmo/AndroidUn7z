@@ -18,7 +18,7 @@ extern "C" {
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 #define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,LOG_TAG,__VA_ARGS__)
 
-int extractAssets(const AAsset* asset, const char* dstPath);
+int extractAssets(AAsset* asset, const char* dstPath);
 int extract7z(const char* srcFile, const char* dstPath);
 
 /*
@@ -50,9 +50,8 @@ JNIEXPORT jint JNICALL Java_im_amomo_andun7z_AndUn7z_un7zipFromAsset
     jint ret;
     if (asset != NULL) {
         ret = extractAssets(asset, cOutPath);
-        AAsset_close(asset);
     } else {
-        ret = 100;
+        ret = SZ_ERROR_OPEN_FAILED;
     }
     LOGD("end extract");
     env->ReleaseStringUTFChars(filePath, cFilePath);

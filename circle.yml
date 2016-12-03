@@ -2,21 +2,25 @@ dependencies:
     pre:
         - echo y | android update sdk --no-ui --all --filter "tools, platform-tools"
         - echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-25"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-22"
         - echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;25.0.1"
         - echo y | $ANDROID_HOME/tools/bin/sdkmanager "cmake;3.6.3155560"
         - echo y | $ANDROID_HOME/tools/bin/sdkmanager "lldb;2.2"
         - echo y | $ANDROID_HOME/tools/bin/sdkmanager "ndk-bundle"
+        - echo y | $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-22;default;armeabi-v7a"
 test:
-    pre:
-        - emulator -avd circleci-android22 -no-audio -no-window:
+    override:
+        - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+        - mksdcard -l testsdcard 1024M sdcard.img
+        - emulator -avd test -sdcard sdcard.img -no-audio -no-window:
             background: true
             parallel: true
         - circle-android wait-for-boot
-        - adb shell input keyevent 82 &
-    override:
-        - ./gradlew lint library:connectAndroidTest
+        - ./gradlew lint library:assembleDebug
+        - adb shell input keyevent 82
+        - ./gradlew library:connectAndroidTest
     post:
         - mkdir -p $CIRCLE_TEST_REPORTS/test/
-        - find . -type f -regex ".*/build/outputs/androidTest-results/connected/*.xml" -exec cp {} $CIRCLE_TEST_REPORTS/test/ \;
         - cp -r library/build/outputs $CIRCLE_ARTIFACTS
+        - cp -r library/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
 
