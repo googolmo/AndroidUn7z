@@ -2,23 +2,32 @@ AndroidUn7z
 ==================
 
 [![Build Status](https://travis-ci.org/googolmo/AndroidUn7z.svg?branch=master)](https://travis-ci.org/googolmo/AndroidUn7z)
+
 [![CircleCI](https://circleci.com/gh/googolmo/AndroidUn7z/tree/master.svg?style=svg)](https://circleci.com/gh/googolmo/AndroidUn7z/tree/master)
 
-* A simple android ndk library used to simply extract lzma 7z files.<br>
+ [![Download](https://api.bintray.com/packages/googolmo/maven/AndroidUn7zip/images/download.svg) ](https://bintray.com/googolmo/maven/AndroidUn7zip/_latestVersion)
 
-* Some times we need to compress some resources in our applications,in some cases,LZMA 
- get smaller achieves than common zip,so we need extract the resources when the app 
+* A simple android ndk library used to simply extract lzma 7z files.
+
+* Some times we need to compress some resources in our applications,in some cases,LZMA
+ get smaller achieves than common zip,so we need extract the resources when the app
 start to run,this library is to do the work.<br>
 
-###1.Introduction
+### Introduction
 * This is a small free library with simple function to extract the 7z file
 * It is a jni call library
-* This library is based on LZMA sdk,it does the most job.
+* This library is based on LZMA sdk, it does the most job.
 
-###2.Usage
+### Usage
 
 ```groovy
-compile 'im.amomo.andun7z:library:1.2.0'
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'im.amomo.andun7z:library:1.2.0'
+}
 ```
 
 ```java
@@ -30,7 +39,7 @@ public void extract7zip() {
 }
 ```
 
-###3.Notice
+### Notice
 
 Please make sure that your application has permission to write data to external storage
 
