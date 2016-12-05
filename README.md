@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compile 'im.amomo.andun7z:library:1.2.0'
+    compile 'im.amomo.andun7z:library:1.2.1'
 }
 ```
 
